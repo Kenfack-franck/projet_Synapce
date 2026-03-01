@@ -4,11 +4,11 @@ export function ConfidenceBar({ finding, score, max }: { finding: string; score:
 
   return (
     <div className="flex items-center gap-2 text-xs">
-      <span className="font-mono text-gray-500 w-6">{finding}</span>
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-20">
+      <span className="w-6 font-mono text-slate-500">{finding}</span>
+      <div className="h-1.5 max-w-28 flex-1 overflow-hidden rounded-full bg-gray-100">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="font-mono text-gray-500">
+      <span className="font-mono text-slate-500">
         {score}/{max}
       </span>
     </div>

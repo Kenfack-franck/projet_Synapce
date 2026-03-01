@@ -1,15 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Worklist } from "./components/Worklist";
-import { PatientDossier } from "./components/PatientDossier";
-import { Architecture } from "./components/Architecture";
+import { Landing } from "./pages/Landing";
+import { Orchestration } from "./pages/Orchestration";
+import { Selection } from "./pages/Selection";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Worklist />} />
-        <Route path="/patient/:id" element={<PatientDossier />} />
-        <Route path="/architecture" element={<Architecture />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/selection" element={<Selection />} />
+        <Route path="/orchestration/:patientId" element={<Orchestration />} />
       </Routes>
     </BrowserRouter>
   );

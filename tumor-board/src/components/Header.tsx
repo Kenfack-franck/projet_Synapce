@@ -1,33 +1,86 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-export function Header({ rightLabel }: { rightLabel?: string }) {
+type HeaderProps = {
+  rightLabel?: string;
+  backLabel?: string;
+  backTo?: string;
+  patientId?: string;
+};
+
+export function Header({ rightLabel, backLabel, backTo, patientId }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const showBack = location.pathname !== "/";
+
+  const scrollToArchitecture = () => {
+    if (location.pathname === "/") {
+      const section = document.getElementById("architecture");
+      section?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    navigate("/#architecture");
+  };
 
   return (
-    <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-50 h-14 border-b border-slate-200 bg-white/90 backdrop-blur-sm">
+      <div className="mx-auto flex h-full max-w-5xl items-center justify-between px-6 md:px-8">
         <div className="flex items-center gap-4">
-          {showBack && (
+          {backLabel && (
             <button
-              onClick={() => navigate(-1)}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 cursor-pointer"
+              type="button"
+              onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+              className="text-sm text-slate-500 transition-colors hover:text-slate-800"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M10 12L6 8l4-4" />
-              </svg>
-              Retour
+              ← {backLabel}
             </button>
           )}
-          <Link to="/" className="no-underline">
-            <h1 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <span className="text-blue-600">✦</span> Synapse
-            </h1>
-            <p className="text-[10px] text-gray-400 tracking-wide">Tumor Board Assistant</p>
+
+          <Link to="/" className="inline-flex items-center gap-2 no-underline">
+            <span className="text-blue-600">✦</span>
+            <span className="text-base font-semibold text-slate-800">Synapse</span>
           </Link>
         </div>
-        {rightLabel && <span className="text-sm text-gray-400">{rightLabel}</span>}
+
+        <div className="flex items-center gap-5">
+          <Link
+            to="/"
+            className={`text-sm no-underline transition-colors ${
+              location.pathname === "/" ? "text-slate-800" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            Accueil
+          </Link>
+
+          <Link
+            to="/selection"
+            className={`text-sm no-underline transition-colors ${
+              location.pathname === "/selection" ? "text-slate-800" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            Patients
+          </Link>
+
+          {patientId && (
+            <Link
+              to={`/orchestration/${patientId}`}
+              className={`text-sm no-underline transition-colors ${
+                location.pathname.startsWith("/orchestration/")
+                  ? "text-slate-800"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              Simulation
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={scrollToArchitecture}
+            className="text-sm text-slate-500 transition-colors hover:text-blue-600"
+          >
+            Architecture
+          </button>
+          {rightLabel && <span className="text-sm text-slate-400">{rightLabel}</span>}
+        </div>
       </div>
     </header>
   );

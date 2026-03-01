@@ -1,140 +1,140 @@
 import { useState } from "react";
 import type { AgentReport } from "../data/patients";
-import { StatusBadge } from "./StatusBadge";
-import { FindingsTable } from "./FindingsTable";
 import { ConfidenceBar } from "./ConfidenceBar";
+import { FindingsTable } from "./FindingsTable";
+import { StatusBadge } from "./StatusBadge";
 
-const statusLabels: Record<string, string> = {
-  progression: "Progression",
-  stable: "Stable",
+const organeLabel: Record<string, string> = {
+  poumons: "Poumons",
+  foie: "Foie",
+  ganglions: "Ganglions",
+  os: "Os",
+};
+
+const statusLabel: Record<string, string> = {
+  progression: "Progressive Disease",
+  stable: "Stable Disease",
   regression: "Régression",
   nouveau: "Nouveau",
   normal: "Normal",
 };
 
-export function AgentAccordion({ agent, index }: { agent: AgentReport; index: number }) {
+export function AgentAccordion({ agent }: { agent: AgentReport; index?: number }) {
   const [open, setOpen] = useState(false);
-  const m = agent.metriques;
+  const [showFullReport, setShowFullReport] = useState(false);
+
+  const title = `${agent.icone} ${organeLabel[agent.organe] ?? agent.organe} — ${agent.agent_name}`;
+  const metrics = agent.metriques;
 
   return (
-    <div
-      className={`border border-gray-200 rounded-lg overflow-hidden bg-white animate-fade-in-up stagger-${index + 3}`}
-    >
-      {/* Header — always visible */}
+    <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:border-gray-300">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-full text-left px-5 py-4 flex items-start justify-between hover:bg-gray-50/50 transition-colors cursor-pointer"
+        className="w-full cursor-pointer px-5 py-5 text-left"
       >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">{agent.icone}</span>
-            <span className="font-semibold text-gray-800 text-[0.95rem]">
-              {agent.organe.charAt(0).toUpperCase() + agent.organe.slice(1)}
-            </span>
-            <span className="text-xs text-gray-400">— {agent.agent_name}</span>
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h3 className="text-[15px] font-semibold text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-600">{agent.resume_court}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={agent.status} label={statusLabel[agent.status] ?? agent.status} />
+              {metrics.vdt && (
+                <StatusBadge
+                  status={metrics.vdt.alerte ? "attention" : "info"}
+                  label={`VDT: ${metrics.vdt.valeur}j${metrics.vdt.alerte ? " ⚠️" : ""}`}
+                />
+              )}
+              {metrics.classification && (
+                <StatusBadge color={metrics.classification_color} label={metrics.classification} />
+              )}
+            </div>
           </div>
-          <p className="text-sm text-gray-500 leading-snug">{agent.resume_court}</p>
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <StatusBadge status={agent.status} label={statusLabels[agent.status] || agent.status} />
-            {m.classification && (
-              <StatusBadge color={m.classification_color} label={m.classification} />
-            )}
-            {m.vdt && m.vdt.alerte && (
-              <span className="text-xs text-red-600 font-medium">
-                VDT: {m.vdt.valeur}j ⚠️
-              </span>
-            )}
-            <span className="text-xs text-gray-400 ml-auto">{agent.standard_medical}</span>
-          </div>
+          <span className={`mt-1 text-sm text-gray-500 transition-transform ${open ? "rotate-180" : ""}`}>
+            ▼
+          </span>
         </div>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          className={`text-gray-400 ml-3 mt-1 transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`}
-        >
-          <path d="M5 8l5 4 5-4" />
-        </svg>
       </button>
 
-      {/* Expanded content */}
-      {open && (
-        <div className="border-t border-gray-100 px-5 py-4 space-y-5">
-          {/* Findings */}
-          {agent.findings.length > 0 && (
+      <div className={`grid transition-all duration-500 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="overflow-hidden border-t border-gray-100">
+          <div className="space-y-5 px-5 py-5">
             <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                Findings ({agent.findings.length})
+              <h4 className="mb-3 text-[11px] font-semibold uppercase tracking-[1.5px] text-gray-400">
+                Findings
               </h4>
               <FindingsTable findings={agent.findings} />
             </div>
-          )}
 
-          {/* Confidence scores */}
-          {m.confidence_scores && m.confidence_scores.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Scores de confiance
+              <h4 className="text-[11px] font-semibold uppercase tracking-[1.5px] text-gray-400">
+                Métriques
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {m.confidence_scores.map((cs) => (
-                  <ConfidenceBar key={cs.finding} {...cs} />
-                ))}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {metrics.classification && (
+                  <StatusBadge color={metrics.classification_color} label={`RECIST: ${metrics.classification}`} />
+                )}
+                {metrics.vdt && (
+                  <StatusBadge
+                    status={metrics.vdt.alerte ? "attention" : "info"}
+                    label={`VDT: ${metrics.vdt.valeur}j${metrics.vdt.alerte ? " ⚠️" : ""}`}
+                  />
+                )}
               </div>
-            </div>
-          )}
-
-          {/* VDT detail */}
-          {m.vdt && (
-            <div className={`text-sm p-3 rounded-lg ${m.vdt.alerte ? "bg-red-50 border border-red-100" : "bg-gray-50"}`}>
-              <span className="font-medium text-gray-700">Volume Doubling Time : </span>
-              <span className="font-mono font-medium">{m.vdt.valeur} jours</span>
-              <p className="text-xs text-gray-500 mt-1">{m.vdt.interpretation}</p>
-            </div>
-          )}
-
-          {/* Full report */}
-          <div>
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Rapport complet
-            </h4>
-            <div className="space-y-3">
-              {agent.rapport.map((section) => (
-                <div key={section.titre}>
-                  <h5 className="text-xs font-semibold text-gray-600 mb-1">{section.titre}</h5>
-                  <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                    {section.contenu}
-                  </p>
+              {metrics.confidence_scores && metrics.confidence_scores.length > 0 && (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {metrics.confidence_scores.map((score) => (
+                    <ConfidenceBar
+                      key={`${agent.organe}-${score.finding}`}
+                      finding={score.finding}
+                      score={score.score}
+                      max={score.max}
+                    />
+                  ))}
                 </div>
-              ))}
+              )}
+              {metrics.donnees_manquantes && metrics.donnees_manquantes.length > 0 && (
+                <p className="mt-3 text-xs text-gray-500">
+                  Données manquantes : {metrics.donnees_manquantes.join(" · ")}
+                </p>
+              )}
             </div>
-          </div>
 
-          {/* Verification + missing data */}
-          <div className="flex flex-wrap gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
-            {m.verification && (
-              <div className="flex items-center gap-3">
-                <span>✅ {m.verification.verifiees} vérifiées</span>
-                {m.verification.corrigees > 0 && (
-                  <span>🔄 {m.verification.corrigees} corrigée{m.verification.corrigees > 1 ? "s" : ""}</span>
-                )}
-                {m.verification.non_resolues > 0 && (
-                  <span>❌ {m.verification.non_resolues} non résolue{m.verification.non_resolues > 1 ? "s" : ""}</span>
-                )}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowFullReport((prev) => !prev)}
+                className="cursor-pointer text-xs font-medium text-gray-500 transition-colors hover:text-blue-600"
+              >
+                Voir le rapport complet {showFullReport ? "▲" : "▼"}
+              </button>
+
+              {showFullReport && (
+                <div className="mt-3 rounded-lg bg-gray-50 p-5">
+                  {agent.rapport.map((section) => (
+                    <section key={`${agent.organe}-${section.titre}`} className="mt-3 first:mt-0">
+                      <h5 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {section.titre}
+                      </h5>
+                      <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+                        {section.contenu}
+                      </p>
+                    </section>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {metrics.verification && (
+              <div className="border-t border-gray-100 pt-4 text-xs text-gray-500">
+                ✅ {metrics.verification.verifiees} mesures vérifiées · 🔄 {metrics.verification.corrigees} corrigée
+                {metrics.verification.corrigees > 1 ? "s" : ""} · ❌ {metrics.verification.non_resolues} non résolue
+                {metrics.verification.non_resolues > 1 ? "s" : ""}
               </div>
             )}
           </div>
-          {m.donnees_manquantes && m.donnees_manquantes.length > 0 && (
-            <div className="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100">
-              <span className="font-medium">Données manquantes :</span>{" "}
-              {m.donnees_manquantes.join(" · ")}
-            </div>
-          )}
         </div>
-      )}
-    </div>
+      </div>
+    </article>
   );
 }

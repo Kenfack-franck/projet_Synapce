@@ -1,41 +1,34 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function TypewriterText({ text, speed = 30 }: { text: string; speed?: number }) {
-  const [displayed, setDisplayed] = useState("");
-  const [started, setStarted] = useState(false);
+  const words = useMemo(() => text.split(" "), [text]);
+  const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setStarted(true);
-      },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+    setIndex(0);
+    setDone(false);
+  }, [text]);
 
   useEffect(() => {
-    if (!started) return;
-    const words = text.split(" ");
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setDisplayed(words.slice(0, i).join(" "));
-      if (i >= words.length) {
-        clearInterval(interval);
-        setDone(true);
-      }
+    if (index >= words.length) {
+      setDone(true);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setIndex((prev) => prev + 1);
     }, speed);
-    return () => clearInterval(interval);
-  }, [started, text, speed]);
+
+    return () => window.clearTimeout(timeout);
+  }, [index, words, speed]);
+
+  const displayed = words.slice(0, index).join(" ");
 
   return (
-    <div ref={ref} className="text-sm text-gray-700 leading-relaxed">
+    <div className="text-sm leading-relaxed text-gray-700">
       {displayed}
-      {started && !done && <span className="animate-pulse ml-0.5 text-blue-500">|</span>}
+      {!done && <span className="ml-0.5 animate-pulse text-blue-500">|</span>}
     </div>
   );
 }
