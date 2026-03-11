@@ -1,73 +1,109 @@
-# React + TypeScript + Vite
+# Synapse — Tumor Board Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Synapse est une POC de hackathon conçue pour accélérer la préparation des RCP oncologiques via une architecture multi-agents.
 
-Currently, two official plugins are available:
+L’idée centrale : un **Hyper-Agent Tumor Board** orchestre des agents spécialistes par organe, corrèle leurs résultats, puis produit une synthèse exploitable en réunion.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Objectif produit
 
-## React Compiler
+- Réduire le temps de préparation d’un dossier en RCP.
+- Structurer l’analyse radiologique multi-organes.
+- Mettre en évidence les corrélations inter-organes difficiles à détecter manuellement.
+- Fournir une synthèse claire : évaluation globale, points de discussion, éléments manquants, conclusion.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Fonctionnement de l’agent (vision système)
 
-## Expanding the ESLint configuration
+Le système est pensé en **pipeline orchestral** :
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Ingestion du contexte patient**
+   - Dossier clinique, historique d’imagerie, examens disponibles.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. **Activation des agents spécialistes**
+   - Thorax
+   - Foie
+   - Ganglions
+   - Os
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3. **Analyse spécialisée par agent**
+   - Extraction des findings.
+   - Classification selon standards médicaux (ex. RECIST selon l’organe concerné).
+   - Production d’un rapport structuré par sections (indication, technique, résultats, classification, conclusion, limitations).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4. **Vérification et support**
+   - Contrôles de cohérence.
+   - Détection des données manquantes.
+   - Consolidation des niveaux de confiance.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+5. **Orchestration Hyper-Agent**
+   - Agrège les sorties des spécialistes.
+   - Détecte les corrélations inter-organes.
+   - Établit une évaluation globale de la situation.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+6. **Synthèse Tumor Board**
+   - Corrélations cliniquement pertinentes.
+   - Points de discussion RCP.
+   - Éléments à compléter.
+   - Conclusion orientée décision collégiale.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Deux modes de simulation dans l’application
+
+### 1) Simulation complète Hyper-Agent
+
+Le moteur orchestre tous les spécialistes, affiche leur progression d’exécution, puis présente :
+
+- la corrélation inter-organes,
+- la synthèse globale tumor board,
+- les rapports détaillés de chaque agent.
+
+### 2) Simulation ciblée sous-agent
+
+Permet de lancer un seul agent (thorax, foie, ganglions, os) pour inspecter son rapport de manière granulaire, avant de remonter vers une synthèse globale.
+
+## Architecture logique
+
+Le design suit une architecture **multi-agents MCP** :
+
+- **Couche orchestrateur** : Hyper-Agent Tumor Board.
+- **Couche spécialistes** : agents organes.
+- **Couche support** : récupération de contexte, guidelines, vérification qualité.
+
+Principe d’extensibilité : ajouter une spécialité revient à ajouter un nouvel agent spécialisé dans la chaîne d’orchestration.
+
+## Stack technique
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+
+## Lancer le projet
+
+### Prérequis
+
+- Node.js 20+
+- npm
+
+### Installation
+
+1. Installer les dépendances
+   - `npm install`
+
+2. Démarrer en local
+   - `npm run dev`
+
+3. Build de production
+   - `npm run build`
+
+4. Prévisualiser la build
+   - `npm run preview`
+
+## Parcours UX
+
+- **Landing** : positionnement produit, valeur clinique, architecture.
+- **Selection** : choix du patient.
+- **Orchestration** : exécution agentique (globale ou ciblée), corrélations, synthèse, rapports.
+
+## Positionnement
+
+Synapse est un assistant de préparation RCP centré sur la lisibilité clinique, la coordination multi-spécialités et la rapidité d’analyse, avec un modèle d’orchestration prêt à évoluer vers de nouvelles spécialités.
